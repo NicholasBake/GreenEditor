@@ -1,8 +1,10 @@
+
 from asyncio import sleep
 from multiprocessing import Process
 from threading import Thread
 import time
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QSizePolicy, QGridLayout
 from PyQt5.QtGui import QFont
 import sys
 
@@ -30,6 +32,7 @@ class WINDOW(QWidget):
         self.app.exec()
 
 
+##### THIS IS FOR MANUAL PLACEMENT ONLY USE IF NECESSARY WONT SCALE WITH WINDOW !!!!!!!!!!!! 
 def setupWidget(widgetToAdd, x = 200, y = 200, w = 200, h = 200, labelText = "", labelFont = 0):
     widgetToAdd.move(x, y)
     widgetToAdd.resize(w, h)
@@ -44,13 +47,14 @@ def setupWidget(widgetToAdd, x = 200, y = 200, w = 200, h = 200, labelText = "",
 
 def guiLoad():
     editorWindow = WINDOW(positionX = 200, sizeX = 1280)
-    test = QLabel(editorWindow.window)
-    test.setFont(QFont())
-    setupWidget(test, labelText = "Hello world!", labelFont= 20)
+    editorWindowLayout = QGridLayout()
+    b1 = QLabel("Hello world!")
+    b1.setFont(QFont('Times', 30))
+    b1.setStyleSheet('QLabel{background-color : red;}')
+    editorWindowLayout.addWidget(b1, 0,0,alignment = QtCore.Qt.AlignHCenter)
+    editorWindow.window.setLayout(editorWindowLayout)
+    editorWindowLayout.activate()
     editorWindow.loadWindow()
-    time.sleep(1)
-    
-    
     
     
     
