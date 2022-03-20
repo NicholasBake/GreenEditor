@@ -28,10 +28,19 @@ def createProjClick():
         print("The '" + gui.Gui.selectDirectoryButton.text() + "' Directory doesn't exist!")
     # Exiting setup window
     gui.Gui.setUpWindow.window.close()
-
+# Function for when the user moves the slider. goal is to move the video back to a certain frame
+def setPosOfVideo():
+    gui.Gui.videoOutput.setPosition(gui.Gui.videoSlider.sliderPosition())
+# Function that will be called everytime the video progresses, moving the slider with it
+def setPosOfSlider():
+    gui.Gui.videoOutput.setNotifyInterval(200)
+    gui.Gui.videoSlider.setSliderPosition(gui.Gui.videoOutput.position())
     
-    
-
+# Backend code for setupwindow
 def loadBackendSetUp():
     gui.Gui.selectDirectoryButton.clicked.connect(selectDirClick)
     gui.Gui.createProjectButton.clicked.connect(createProjClick)
+# Backend code for mainWindow
+def loadBackendMain():
+    gui.Gui.videoSlider.sliderMoved.connect(setPosOfVideo)
+    gui.Gui.videoOutput.positionChanged.connect(setPosOfSlider)
