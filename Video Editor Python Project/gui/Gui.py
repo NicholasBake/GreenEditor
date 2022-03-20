@@ -1,6 +1,9 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QSizePolicy, QGridLayout, QComboBox, QVBoxLayout, QHBoxLayout
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QSizePolicy, QGridLayout, QComboBox, QVBoxLayout, QHBoxLayout, QSlider
+from PyQt5.QtGui import QFont, QFontDatabase
+from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaPlaylist, QMediaContent
+from PyQt5.QtCore import QUrl
 import sys
 import os
 sys.path.append('..')
@@ -49,8 +52,10 @@ def setupWidget(widgetToAdd, x = 200, y = 200, w = 200, h = 200, labelText = "",
             widgetToAdd.setFont(QFont('Times', 10))
     widgetToAdd.show()
 
-
-
+# A quick function that will process font files
+def createFont(str):
+    label = QFontDatabase.addApplicationFont('fonts/PlayfairDisplay-VariableFont_wght.ttf')
+    return label
 
 def guiLoad():
     # Creating setup window, where you can set name of project and where to save it
@@ -78,6 +83,7 @@ def guiLoad():
     global selectDirectoryButton
     selectDirectoryButton = QPushButton("...")
     selectDirectoryButton.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+
     # Secondary layout for input boxes (filepath selection, actually creating the project button)
     inputLayout = QHBoxLayout()
     inputLayout.setContentsMargins(100,0,100,0)
@@ -86,7 +92,7 @@ def guiLoad():
     setUpWindowLayout.addLayout(inputLayout)
     
 
-    
+    # Adding backend code and loading setup window
     setUpWindow.window.setLayout(setUpWindowLayout)
     backend.implement.loadBackendSetUp()
     setUpWindow.loadWindow()
@@ -96,20 +102,66 @@ def guiLoad():
     temp.setLayout(setUpWindowLayout)
     
     # Creating actual Editing window
+
     editorWindow = WINDOW(positionX = 0, sizeX = 1280, name="Green Editor")
-    editorWindowLayout = QGridLayout()
+
+    # Main layout of editorWindow
+    mainLay = QVBoxLayout()
+
+    # Creating font for b1 label
+    idoffont = createFont('fonts/PlayfairDisplay-VariableFont_wght.ttf')
+    print(QFontDatabase.applicationFontFamilies(idoffont))
+
+    # Label that will display location of the file. Will be in the top-left
     b1 = QLabel(selectDirectoryButton.text())
-    b1.setFont(QFont('Times', 30))
-    b2 = QPushButton("Hello world!")
-    b3 = QPushButton("Hello world1")
-    b2.setSizePolicy(QSizePolicy.Policy.Minimum,QSizePolicy.Policy.Minimum)
-    b3.setSizePolicy(QSizePolicy.Policy.Minimum,QSizePolicy.Policy.Minimum)
-    editorWindowLayout.addWidget(b1, 0,0,alignment= QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
-    editorWindowLayout.addWidget(b2, 2, 0)
-    editorWindowLayout.addWidget(b3, 1, 0)
-    editorWindow.window.setLayout(editorWindowLayout)
+    b1.setFont(QFont("Playfair Display", 20))
+    b1.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+
+    mainLay.addWidget(b1, alignment= QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+
+    # Object that analyises video in qmediaplaylist and sends it to a QVideoWidget so user can see video
+    global videoOutput 
+    videoOutput = QMediaPlayer()
+    
+
+
+    global videoPlaylist 
+    videoPlaylist = QMediaPlaylist(videoOutput)
+
+    videoPlaylist.addMedia(QMediaContent(QUrl.fromLocalFile('video/2022.01.12-19.13_Trim.avi')))
+    videoOutput.setPlaylist(videoPlaylist)
+
+    videoPlaylist.setPlaybackMode(QMediaPlaylist.Loop)
+    # Actual visible widget
+    global videoSee
+    videoSee = QVideoWidget()
+
+    videoSee.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+
+    # Setting videoOutput's VideoOutput attribute 
+    videoOutput.setVideoOutput(videoSee)
+
+    mainLay.addWidget(videoSee)
+    
+    # Creating buttons that will allow user to pause video and scroll through video
+    global pauseAndPlay 
+    pauseAndPlay = QPushButton()
+
+    global videoSlider
+    videoSlider = QSlider(QtCore.Qt.Horizontal)
+
+    videoSlider.setRange(0,3000)
+    # Making a horizontal layout for these widgets since they are next to eachother
+    videoWidgets = QHBoxLayout()
+
+    videoWidgets.addWidget(pauseAndPlay)
+    videoWidgets.addWidget(videoSlider)
+
+    mainLay.addLayout(videoWidgets)
+    # Playing video
+    videoOutput.play()
+
+    editorWindow.window.setLayout(mainLay)
+    backend.implement.loadBackendMain()
     editorWindow.loadWindow()
-    
-    
-    
 
